@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ぽこぽこジェネレータ</title>
+    <style>
+        /* 全体のレイアウト（縦横中央揃え） */
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f4f8;
+            font-family: 'Hiragino Maru Gothic ProN', 'Rounded M+ 1c', 'Meiryo', sans-serif;
+            color: #333;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #4a5568;
+        }
+
+        /* 生成結果表示枠 */
+        #result-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 80%;
+            max-width: 600px;
+            min-height: 120px;
+            background-color: #ffffff;
+            border: 4px dashed #cbd5e0;
+            border-radius: 16px;
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* ボタンUI */
+        #generate-btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            background-color: #4299e1;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        #generate-btn:hover {
+            background-color: #3182ce;
+        }
+
+        #generate-btn:active {
+            transform: scale(0.95);
+        }
+
+        #generate-btn:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ----- 特別演出用のCSS ----- */
+
+        /* お祝い演出（ぽこ あ ぽけもん） */
+        .celebration-mode {
+            animation: rainbow-bg 2s infinite linear, pop-up 0.5s ease-out forwards;
+            border-style: solid !important;
+            border-color: #ecc94b !important;
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes rainbow-bg {
+            0% {
+                background-color: #ff9a9e;
+            }
+
+            25% {
+                background-color: #fecfef;
+            }
+
+            50% {
+                background-color: #a1c4fd;
+            }
+
+            75% {
+                background-color: #c2e9fb;
+            }
+
+            100% {
+                background-color: #ff9a9e;
+            }
+        }
+
+        @keyframes pop-up {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* ふにゃっとした演出（めたもん） */
+        .metamon-text {
+            display: inline-block;
+            color: #b83280;
+            font-family: 'Comic Sans MS', 'HGMaruGothicMPRO', cursive, sans-serif;
+            animation: funya-funya 1.5s infinite ease-in-out;
+        }
+
+        @keyframes funya-funya {
+            0% {
+                transform: scale(1, 1) skew(0deg) translate(0, 0);
+            }
+
+            25% {
+                transform: scale(1.1, 0.9) skew(5deg) translate(0, 2px);
+            }
+
+            50% {
+                transform: scale(0.95, 1.05) skew(-5deg) translate(0, -2px);
+            }
+
+            75% {
+                transform: scale(1.05, 0.95) skew(2deg) translate(0, 1px);
+            }
+
+            100% {
+                transform: scale(1, 1) skew(0deg) translate(0, 0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>ぽこぽこジェネレータ</h1>
+    <div id="result-box">ボタンを押してね！</div>
+    <button id="generate-btn">生成する</button>
+
+    <script>
+        // 固定配列に指定した文字セット（当たりの確率を少し上げるために文字種を絞っています）
+        const charSet = ['ぽ', 'こ', 'あ', 'ぽ', 'け', 'も', 'ん', 'ぽ', 'こ', 'あ', 'ぽ', 'け', 'も', 'ん', 'め', 'た'];
+
+        // DOM要素の取得
+        const resultBox = document.getElementById('result-box');
+        const generateBtn = document.getElementById('generate-btn');
+
+        // ランダムな文字を1文字取得する関数
+        function getRandomChar() {
+            const randomIndex = Math.floor(Math.random() * charSet.length);
+            return charSet[randomIndex];
+        }
+
+        // 指定文字数分のランダム文字列を生成する関数
+        function generateRandomString(length) {
+            let str = '';
+            for (let i = 0; i < length; i++) {
+                str += getRandomChar();
+            }
+            return str;
+        }
+
+        // 生成処理のメインロジック
+        async function handleGenerate() {
+            // 1. UIの切り替えとボタンの無効化
+            generateBtn.disabled = true;
+            resultBox.textContent = '生成中…';
+            resultBox.className = ''; // アニメーションクラスをリセット
+
+            // 2. 文字列生成ルール: 2文字 + 半角スペース + 1文字 + 半角スペース + 4文字
+            const part1 = generateRandomString(2);
+            const part2 = generateRandomString(1);
+            const part3 = generateRandomString(4);
+            let generatedText = `${part1} ${part2} ${part3}`;
+
+            // デバッグ用: 強制的に当たりを出したい場合は以下のコメントアウトを外してください
+            // generatedText = 'ぽこ あ ぽけもん';
+            // generatedText = 'あめ ぽ めたもん';
+
+            // 3. 1秒待機
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
+            // 4. 結果の評価と表示
+            if (generatedText === 'ぽこ あ ぽけもん') {
+                // 完全一致の場合：お祝い演出
+                resultBox.textContent = generatedText;
+                resultBox.classList.add('celebration-mode');
+            } else if (generatedText.includes('めたもん')) {
+                // 「めたもん」が含まれる場合：該当部分をspanで囲む
+                // セキュリティ上、今回はユーザー入力がないためinnerHTMLを安全に使用可能
+                const styledText = generatedText.replace(
+                    /めたもん/g,
+                    '<span class="metamon-text">めたもん</span>'
+                );
+                resultBox.innerHTML = styledText;
+            } else {
+                // 通常の結果表示
+                resultBox.textContent = generatedText;
+            }
+
+            // ボタンを再度有効化
+            generateBtn.disabled = false;
+        }
+
+        // イベントリスナーの登録
+        generateBtn.addEventListener('click', handleGenerate);
+    </script>
+</body>
+
+</html>
